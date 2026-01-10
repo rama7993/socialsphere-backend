@@ -29,6 +29,12 @@ export class UsersController {
     return this.usersService.findAll(filterDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return this.usersService.findOne(req.user.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);

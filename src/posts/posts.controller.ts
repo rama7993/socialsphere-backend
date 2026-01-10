@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
+  Param,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -22,8 +24,20 @@ export class PostsController {
     return this.postsService.create(createPostDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('feed')
+  getFeed(@Request() req) {
+    return this.postsService.findFeed(req.user.userId);
+  }
+
   @Get()
   findAll() {
     return this.postsService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  remove(@Param('id') id: string, @Request() req) {
+    return this.postsService.remove(id, req.user.userId);
   }
 }

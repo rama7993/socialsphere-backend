@@ -25,4 +25,10 @@ export class CommentsController {
   findByPost(@Param('postId') postId: string) {
     return this.commentsService.findByPost(postId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/like')
+  toggleLike(@Param('id') id: string, @Request() req) {
+    return this.commentsService.toggleLike(req.user, id);
+  }
 }

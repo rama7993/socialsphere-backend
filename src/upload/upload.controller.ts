@@ -5,33 +5,20 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { CloudinaryService } from './cloudinary.service';
 
 @Controller('upload')
 export class UploadController {
+  constructor(private readonly cloudinaryService: CloudinaryService) {}
+
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-        },
-      }),
-    }),
-  )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) return { message: 'No file uploaded' };
 
-    // Return the URL to access the file
-    // Assumes server is running on localhost:3000
-    // We will serve static files from /uploads path
+    const result = await this.cloudinaryService.uploadImage(file);
     return {
-      url: `http://localhost:3000/uploads/${file.filename}`,
+      url: result.secure_url,
     };
   }
 }

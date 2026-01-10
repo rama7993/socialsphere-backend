@@ -22,6 +22,9 @@ export class User extends BaseEntity {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ nullable: true })
+  avatarUrl: string;
+
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
@@ -31,4 +34,10 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => User, (user) => user.followers)
   following: User[];
+
+  @Column({ type: 'varchar', nullable: true })
+  resetPasswordToken: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetPasswordExpires: Date | null;
 }

@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { Post } from '../../posts/entities/post.entity';
@@ -13,4 +20,14 @@ export class Comment extends BaseEntity {
 
   @ManyToOne(() => Post, (post) => post.comments)
   post: Post;
+
+  @ManyToOne(() => Comment, (comment) => comment.replies, { nullable: true })
+  parent: Comment;
+
+  @OneToMany(() => Comment, (comment) => comment.parent)
+  replies: Comment[];
+
+  @ManyToMany(() => User, { eager: true })
+  @JoinTable()
+  likes: User[];
 }

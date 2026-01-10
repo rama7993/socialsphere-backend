@@ -23,4 +23,10 @@ export class LikesController {
   countLikes(@Param('postId') postId: string) {
     return this.likesService.countLikes(postId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('post/:postId/check')
+  checkLike(@Param('postId') postId: string, @Request() req) {
+    return this.likesService.checkLike(req.user, postId);
+  }
 }

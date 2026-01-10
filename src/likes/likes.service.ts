@@ -37,4 +37,11 @@ export class LikesService {
   async countLikes(postId: string): Promise<number> {
     return this.likesRepository.count({ where: { post: { id: postId } } });
   }
+
+  async checkLike(user: User, postId: string): Promise<{ liked: boolean }> {
+    const count = await this.likesRepository.count({
+      where: { user: { id: user.id }, post: { id: postId } },
+    });
+    return { liked: count > 0 };
+  }
 }

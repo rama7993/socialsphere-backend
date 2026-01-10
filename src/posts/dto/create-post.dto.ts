@@ -7,8 +7,7 @@ import {
 } from 'class-validator';
 
 export class CreatePostDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
   userId: string;
 
@@ -22,6 +21,5 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsString()
-  @IsUrl()
   imageUrl?: string;
 }

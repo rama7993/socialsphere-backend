@@ -34,6 +34,38 @@ export class PostsService {
   findAll(): Promise<Post[]> {
     return this.postsRepository.find({
       relations: ['author'],
+      order: { createdAt: 'DESC' },
     });
+  }
+
+  async findFeed(userId: string): Promise<Post[]> {
+    return this.postsRepository.find({
+      where: {
+        author: {
+          followers: {
+            id: userId,
+          },
+        },
+      },
+      relations: ['author', 'author.followers'], // Load followers to check connection if needed, though 'where' clause does the filtering
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async remove(id: string, userId: string): Promise<void> {
+    const post = await this.postsRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (post.author.id !== userId) {
+      throw new NotFoundException('You can only delete your own posts');
+    }
+
+    await this.postsRepository.remove(post);
   }
 }

@@ -29,8 +29,8 @@ import { UploadModule } from './upload/upload.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        autoLoadEntities: true, // Auto-load entities
-        synchronize: configService.get<string>('DB_SYNC') === 'true', // 👈 Safe: Only sync if explicitly enabled
+        autoLoadEntities: true,
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),

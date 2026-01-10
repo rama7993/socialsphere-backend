@@ -17,7 +17,11 @@ export class UsersService {
     const skip = (page - 1) * limit;
 
     const where = search
-      ? [{ firstName: Like(`%${search}%`) }, { lastName: Like(`%${search}%`) }]
+      ? [
+          { firstName: Like(`%${search}%`) },
+          { lastName: Like(`%${search}%`) },
+          { username: Like(`%${search}%`) },
+        ]
       : {};
 
     return this.usersRepository.find({
@@ -28,7 +32,34 @@ export class UsersService {
   }
 
   findOne(id: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({ id });
+    return this.usersRepository
+      .findOne({
+        where: { id },
+        relations: {
+          followers: true,
+          following: true,
+        },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          isActive: true,
+          createdAt: true,
+        },
+      })
+      .then((user) => {
+        if (!user) return null;
+        return {
+          ...user,
+          followersCount: user.followers.length,
+          followingCount: user.following.length,
+          followers: undefined,
+          following: undefined,
+        } as any;
+      });
   }
 
   findByUsername(username: string): Promise<User | null> {
@@ -95,5 +126,17 @@ export class UsersService {
   async create(user: CreateUserDto): Promise<User> {
     const newUser = this.usersRepository.create(user);
     return this.usersRepository.save(newUser);
+  }
+
+  findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ email });
+  }
+
+  findByResetToken(token: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ resetPasswordToken: token });
+  }
+
+  async save(user: User): Promise<User> {
+    return this.usersRepository.save(user);
   }
 }
