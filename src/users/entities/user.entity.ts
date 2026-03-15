@@ -35,6 +35,15 @@ export class User extends BaseEntity {
   @ManyToMany(() => User, (user) => user.followers)
   following: User[];
 
+  @Column({ type: 'text', nullable: true })
+  bio: string;
+
+  @Column({ nullable: true })
+  location: string;
+
+  @Column({ nullable: true })
+  website: string;
+
   @Column({ type: 'varchar', nullable: true })
   resetPasswordToken: string | null;
 

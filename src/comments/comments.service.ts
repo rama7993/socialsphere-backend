@@ -5,6 +5,8 @@ import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { User } from '../users/entities/user.entity';
 import { Post } from '../posts/entities/post.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class CommentsService {
@@ -13,14 +15,16 @@ export class CommentsService {
     private commentsRepository: Repository<Comment>,
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
     user: User,
     createCommentDto: CreateCommentDto,
   ): Promise<Comment> {
-    const post = await this.postsRepository.findOneBy({
-      id: createCommentDto.postId,
+    const post = await this.postsRepository.findOne({
+      where: { id: createCommentDto.postId },
+      relations: ['author'],
     });
 
     if (!post) {
@@ -44,15 +48,31 @@ export class CommentsService {
       parent: parentComment || undefined,
     } as any) as unknown as Comment;
 
-    return this.commentsRepository.save(comment);
+    const savedComment = await this.commentsRepository.save(comment);
+
+    await this.notificationsService.create(
+      post.author,
+      user,
+      NotificationType.COMMENT,
+      post.id,
+    );
+
+    return savedComment;
   }
 
   async findByPost(postId: string): Promise<Comment[]> {
     return this.commentsRepository.find({
-      where: { post: { id: postId }, parent: IsNull() }, // Only fetch top-level comments
-      relations: ['replies', 'replies.author', 'likes'], // Load replies and likes
+      where: { post: { id: postId }, parent: IsNull() },
+      relations: ['replies', 'replies.author', 'likes'],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async countByPost(postId: string): Promise<{ count: number }> {
+    const count = await this.commentsRepository.count({
+      where: { post: { id: postId } },
+    });
+    return { count };
   }
 
   async toggleLike(user: User, commentId: string): Promise<{ liked: boolean }> {

@@ -3,15 +3,18 @@ import {
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { EmailService } from './email.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -33,7 +36,7 @@ export class AuthService {
       }
       return null;
     } catch (error) {
-      console.error('Error in validateUser:', error);
+      this.logger.error('Error in validateUser:', error);
       throw error;
     }
   }
@@ -46,11 +49,18 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    return this.usersService.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
+    try {
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+      return await this.usersService.create({
+        ...createUserDto,
+        password: hashedPassword,
+      });
+    } catch (error) {
+      if (error.code === '23505') { // Postgres unique violation code
+        throw new BadRequestException('Email or username already exists');
+      }
+      throw error;
+    }
   }
 
   async forgotPassword(email: string) {
@@ -59,9 +69,7 @@ export class AuthService {
       throw new NotFoundException('User with this email does not exist');
     }
 
-    const token =
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15);
+    const token = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = token;
     user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
 

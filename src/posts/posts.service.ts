@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { User } from '../users/entities/user.entity';
@@ -31,24 +31,61 @@ export class PostsService {
     return this.postsRepository.save(newPost);
   }
 
-  findAll(): Promise<Post[]> {
+  findAll(page: number = 1, limit: number = 10): Promise<Post[]> {
     return this.postsRepository.find({
       relations: ['author'],
       order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 
-  async findFeed(userId: string): Promise<Post[]> {
-    return this.postsRepository.find({
+  async findFeed(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ posts: Post[]; followingCount: number }> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['following'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const followingCount = user.following.length;
+    const followingIds = user.following.map((u) => u.id);
+    
+    // Include own posts in the feed as per common social media logic
+    const authorIds = [...followingIds, userId];
+
+    const posts = await this.postsRepository.find({
       where: {
         author: {
-          followers: {
-            id: userId,
-          },
+          id: In(authorIds),
         },
       },
-      relations: ['author', 'author.followers'], // Load followers to check connection if needed, though 'where' clause does the filtering
+      relations: ['author'],
       order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { posts, followingCount };
+  }
+
+  findByUser(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<Post[]> {
+    return this.postsRepository.find({
+      where: { author: { id: userId } },
+      relations: ['author'],
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 

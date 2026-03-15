@@ -14,6 +14,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { UsersFilterDto } from './dto/filter-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { Patch } from '@nestjs/common';
 
 @Controller('users')
 export class UsersController {
@@ -24,15 +26,28 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Query() filterDto: UsersFilterDto) {
-    return this.usersService.findAll(filterDto);
+  findAll(@Query() filterDto: UsersFilterDto, @Request() req) {
+    return this.usersService.findAll(filterDto, req.user?.userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return this.usersService.findOne(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(req.user.userId, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('suggestions')
+  getSuggestions(@Request() req) {
+    return this.usersService.getSuggestions(req.user.userId);
   }
 
   @Get(':id')
@@ -66,5 +81,11 @@ export class UsersController {
   @Get(':id/following')
   getFollowing(@Param('id') id: string) {
     return this.usersService.getFollowing(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/followers')
+  removeFollower(@Param('id') followerId: string, @Request() req) {
+    return this.usersService.removeFollower(req.user.userId, followerId);
   }
 }

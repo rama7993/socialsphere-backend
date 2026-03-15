@@ -21,6 +21,11 @@ export class CommentsController {
     return this.commentsService.create(req.user, createCommentDto);
   }
 
+  @Get('post/:postId/count')
+  countByPost(@Param('postId') postId: string) {
+    return this.commentsService.countByPost(postId);
+  }
+
   @Get('post/:postId')
   findByPost(@Param('postId') postId: string) {
     return this.commentsService.findByPost(postId);

@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
   private transporter;
 
   constructor(private configService: ConfigService) {
@@ -33,12 +34,12 @@ export class EmailService {
 
     try {
       if (!this.configService.get('EMAIL_USER')) {
-        console.log('Mock Email Service: Email not configured.');
-        console.log(`Reset Link: ${resetLink}`);
+        this.logger.warn('Mock Email Service: Email not configured.');
+        this.logger.log(`Reset Link: ${resetLink}`);
         return;
       }
       await this.transporter.sendMail(mailOptions);
-      console.log(`Password reset email sent to ${to}`);
+      this.logger.log(`Password reset email sent to ${to}`);
     } catch (error) {
       console.error('Error sending email:', error);
       throw error;

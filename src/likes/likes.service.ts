@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Like } from './entities/like.entity';
 import { Post } from '../posts/entities/post.entity';
 import { User } from '../users/entities/user.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class LikesService {
@@ -12,10 +14,14 @@ export class LikesService {
     private likesRepository: Repository<Like>,
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async toggleLike(user: User, postId: string): Promise<{ liked: boolean }> {
-    const post = await this.postsRepository.findOneBy({ id: postId });
+    const post = await this.postsRepository.findOne({
+      where: { id: postId },
+      relations: ['author'],
+    });
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -30,12 +36,35 @@ export class LikesService {
     } else {
       const newLike = this.likesRepository.create({ user, post });
       await this.likesRepository.save(newLike);
+
+      await this.notificationsService.create(
+        post.author,
+        user,
+        NotificationType.LIKE,
+        postId,
+      );
+
       return { liked: true };
     }
   }
 
   async countLikes(postId: string): Promise<number> {
     return this.likesRepository.count({ where: { post: { id: postId } } });
+  }
+
+  async getLikers(postId: string) {
+    const likes = await this.likesRepository.find({
+      where: { post: { id: postId } },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+    return likes.map(({ user }) => ({
+      id: user.id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl,
+    }));
   }
 
   async checkLike(user: User, postId: string): Promise<{ liked: boolean }> {

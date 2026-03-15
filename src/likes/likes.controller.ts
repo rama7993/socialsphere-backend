@@ -19,6 +19,11 @@ export class LikesController {
     return this.likesService.toggleLike(req.user, postId);
   }
 
+  @Get('post/:postId/users')
+  getLikers(@Param('postId') postId: string) {
+    return this.likesService.getLikers(postId);
+  }
+
   @Get('post/:postId')
   countLikes(@Param('postId') postId: string) {
     return this.likesService.countLikes(postId);
