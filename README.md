@@ -4,16 +4,17 @@ Scalable and efficient server-side architecture for the SocialSphere platform. B
 
 ## ✨ Features
 
-- **Robust Authentication**: JWT-based secure authentication flow.
+- **Robust Authentication**: Standardized JWT-based secure authentication flow using `id` for consistent database relations.
 - **Social Graph Engine**: 
   - Optimized Follow/Unfollow systems.
   - Multi-level commenting architecture.
   - Liked status tracking and synchronization for posts/comments.
 - **Advanced Story Management**:
-  - Automated cleanup of stories after 30 days via scheduled Cron tasks.
+  - Automated cleanup of stories via scheduled Cron tasks.
+  - Smart visibility: Followed users + user's own stories integrated into the feed.
   - Real-time "Seen" tracking and persistence.
-- **Notifications**: Automated trigger system for social events (likes, follows, comments).
-- **Reliable Networking**: CORS enabled, helmet security integrated, and compression optimized.
+- **Notifications**: Automated trigger system for social events (likes, follows, comments) with defensive actor data handling.
+- **Reliable Networking**: Optimized CORS utility with dynamic origin validation.
 
 ## 🛠 Tech Stack
 

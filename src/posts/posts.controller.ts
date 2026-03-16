@@ -21,7 +21,7 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createPostDto: CreatePostDto, @Request() req) {
-    createPostDto.userId = req.user.userId;
+    createPostDto.userId = req.user.id;
     return this.postsService.create(createPostDto);
   }
 
@@ -29,7 +29,7 @@ export class PostsController {
   @Get('feed')
   getFeed(@Request() req, @Query() paginationDto: PaginationDto) {
     return this.postsService.findFeed(
-      req.user.userId,
+      req.user.id,
       paginationDto.page,
       paginationDto.limit,
     );
@@ -52,6 +52,6 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
-    return this.postsService.remove(id, req.user.userId);
+    return this.postsService.remove(id, req.user.id);
   }
 }

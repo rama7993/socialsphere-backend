@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -35,5 +36,11 @@ export class CommentsController {
   @Post(':id/like')
   toggleLike(@Param('id') id: string, @Request() req) {
     return this.commentsService.toggleLike(req.user, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  remove(@Param('id') id: string, @Request() req) {
+    return this.commentsService.remove(req.user, id);
   }
 }

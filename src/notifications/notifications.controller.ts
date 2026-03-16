@@ -16,24 +16,24 @@ export class NotificationsController {
   @UseGuards(JwtAuthGuard)
   @Get('unread-count')
   unreadCount(@Request() req) {
-    return this.notificationsService.countUnread(req.user.userId);
+    return this.notificationsService.countUnread(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Request() req) {
-    return this.notificationsService.findAll(req.user.userId);
+    return this.notificationsService.findAll(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/read')
   markAsRead(@Param('id') id: string, @Request() req) {
-    return this.notificationsService.markAsRead(id, req.user.userId);
+    return this.notificationsService.markAsRead(id, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('read-all')
   markAllAsRead(@Request() req) {
-    return this.notificationsService.markAllAsRead(req.user.userId);
+    return this.notificationsService.markAllAsRead(req.user.id);
   }
 }

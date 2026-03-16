@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
+import { corsOriginHelper } from './common/utils/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,12 +35,16 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: corsOriginHelper,
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   const port = process.env.PORT ?? 3000;
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
 }
 
 bootstrap();

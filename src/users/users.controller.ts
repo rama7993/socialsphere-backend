@@ -29,25 +29,25 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() filterDto: UsersFilterDto, @Request() req) {
-    return this.usersService.findAll(filterDto, req.user?.userId);
+    return this.usersService.findAll(filterDto, req.user?.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
-    return this.usersService.findOne(req.user.userId);
+    return this.usersService.findOne(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(req.user.userId, updateUserDto);
+    return this.usersService.update(req.user.id, updateUserDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('suggestions')
   getSuggestions(@Request() req) {
-    return this.usersService.getSuggestions(req.user.userId);
+    return this.usersService.getSuggestions(req.user.id);
   }
 
   @Get(':id')
@@ -64,13 +64,13 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Post(':id/follow')
   follow(@Param('id') targetId: string, @Request() req) {
-    return this.usersService.followUser(req.user.userId, targetId);
+    return this.usersService.followUser(req.user.id, targetId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id/follow')
   unfollow(@Param('id') targetId: string, @Request() req) {
-    return this.usersService.unfollowUser(req.user.userId, targetId);
+    return this.usersService.unfollowUser(req.user.id, targetId);
   }
 
   @Get(':id/followers')
@@ -86,6 +86,6 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id/followers')
   removeFollower(@Param('id') followerId: string, @Request() req) {
-    return this.usersService.removeFollower(req.user.userId, followerId);
+    return this.usersService.removeFollower(req.user.id, followerId);
   }
 }

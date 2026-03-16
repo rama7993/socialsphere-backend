@@ -63,7 +63,7 @@ export class CommentsService {
   async findByPost(postId: string): Promise<Comment[]> {
     return this.commentsRepository.find({
       where: { post: { id: postId }, parent: IsNull() },
-      relations: ['replies', 'replies.author', 'likes'],
+      relations: ['author', 'replies', 'replies.author', 'likes'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -92,8 +92,24 @@ export class CommentsService {
     } else {
       comment.likes.push(user);
     }
-
     await this.commentsRepository.save(comment);
     return { liked: !isLiked };
+  }
+
+  async remove(user: User, id: string): Promise<void> {
+    const comment = await this.commentsRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (comment.author.id !== user.id) {
+      throw new NotFoundException('You can only delete your own comments');
+    }
+
+    await this.commentsRepository.remove(comment);
   }
 }

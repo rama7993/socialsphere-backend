@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, LessThanOrEqual, IsNull } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -30,7 +35,7 @@ export class StoriesService implements OnModuleInit {
 
     const story = this.storiesRepository.create({
       ...createStoryDto,
-      user: { id: user.userId } as User,
+      user: { id: user.id } as User,
       expiresAt,
     });
 
@@ -39,14 +44,20 @@ export class StoriesService implements OnModuleInit {
 
   async findAllFollowed(user: User): Promise<Story[]> {
     return this.storiesRepository.find({
-      where: {
-        expiresAt: MoreThan(new Date()),
-        user: {
-          followers: {
-            id: user.id,
+      where: [
+        {
+          expiresAt: MoreThan(new Date()),
+          user: {
+            followers: {
+              id: user.id,
+            },
           },
         },
-      },
+        {
+          expiresAt: MoreThan(new Date()),
+          user: { id: user.id },
+        },
+      ],
       relations: ['user', 'seenBy'],
       order: { createdAt: 'DESC' },
     });
@@ -73,9 +84,9 @@ export class StoriesService implements OnModuleInit {
       throw new NotFoundException('Story not found');
     }
 
-    const alreadySeen = story.seenBy.some((u) => u.id === user.userId);
+    const alreadySeen = story.seenBy.some((u) => u.id === user.id);
     if (!alreadySeen) {
-      story.seenBy.push({ id: user.userId } as User);
+      story.seenBy.push({ id: user.id } as User);
       await this.storiesRepository.save(story);
     }
   }

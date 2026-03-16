@@ -53,18 +53,25 @@ export class LikesService {
   }
 
   async getLikers(postId: string) {
-    const likes = await this.likesRepository.find({
-      where: { post: { id: postId } },
-      relations: ['user'],
-      order: { createdAt: 'DESC' },
-    });
-    return likes.map(({ user }) => ({
-      id: user.id,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatarUrl: user.avatarUrl,
-    }));
+    try {
+      const likes = await this.likesRepository.find({
+        where: { post: { id: postId } },
+        relations: ['user'],
+        order: { createdAt: 'DESC' },
+      });
+      return likes
+        .filter((like) => !!like.user)
+        .map(({ user }) => ({
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatarUrl: user.avatarUrl,
+        }));
+    } catch (error) {
+      console.error('Error fetching likers:', error);
+      throw error;
+    }
   }
 
   async checkLike(user: User, postId: string): Promise<{ liked: boolean }> {
