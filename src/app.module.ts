@@ -17,6 +17,7 @@ import { StoriesModule } from './stories/stories.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     UploadModule,
     StoriesModule,
     NotificationsModule,
+    AiModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
