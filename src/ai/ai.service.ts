@@ -16,7 +16,7 @@ export class AiService {
           content: [
             {
               type: 'text',
-              text: 'Describe this image for a social media post. Provide 3 creative captions and relevant hashtags. Keep it engaging.',
+              text: 'Generate a single, highly engaging, ready-to-publish social media post for this image. Include a hook, body, and relevant hashtags. Do NOT include any introductory/explanatory text, conversational filler, markdown headers, labels, or alternative options. Output ONLY the post itself.',
             },
             { type: 'image', image: imageBase64 },
           ],

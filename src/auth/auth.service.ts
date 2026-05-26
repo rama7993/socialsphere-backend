@@ -56,7 +56,8 @@ export class AuthService {
         password: hashedPassword,
       });
     } catch (error) {
-      if (error.code === '23505') { // Postgres unique violation code
+      if (error.code === '23505') {
+        // Postgres unique violation code
         throw new BadRequestException('Email or username already exists');
       }
       throw error;

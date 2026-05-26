@@ -22,9 +22,9 @@ export class Notification extends BaseEntity {
   @Column({ nullable: true })
   relatedId: string; // Post ID or Comment ID
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   recipient: User;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   actor: User;
 }

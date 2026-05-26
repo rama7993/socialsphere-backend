@@ -56,7 +56,7 @@ export class PostsService {
 
     const followingCount = user.following.length;
     const followingIds = user.following.map((u) => u.id);
-    
+
     // Include own posts in the feed as per common social media logic
     const authorIds = [...followingIds, userId];
 

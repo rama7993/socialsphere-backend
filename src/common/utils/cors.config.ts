@@ -2,7 +2,10 @@
  * Helper to determine if a request origin is allowed by CORS.
  * Supports the frontend URL from environment variables and common local development ports.
  */
-export const corsOriginHelper = (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+export const corsOriginHelper = (
+  origin: string | undefined,
+  callback: (err: Error | null, allow?: boolean) => void,
+) => {
   const allowedOrigins = [
     process.env.FRONTEND_URL,
     'http://localhost:5173',

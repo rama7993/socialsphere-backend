@@ -19,7 +19,10 @@ export class UsersService {
     private notificationsService: NotificationsService,
   ) {}
 
-  async findAll(filterDto: UsersFilterDto, currentUserId?: string): Promise<User[]> {
+  async findAll(
+    filterDto: UsersFilterDto,
+    currentUserId?: string,
+  ): Promise<User[]> {
     const { page = 1, limit = 10, search } = filterDto;
     const skip = (page - 1) * limit;
 

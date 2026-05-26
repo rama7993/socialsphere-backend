@@ -21,7 +21,10 @@ import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+    }),
     ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
@@ -33,10 +36,12 @@ import { AiModule } from './ai/ai.module';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        ssl: {
-          rejectUnauthorized: false,
-        },
+        synchronize: configService.get('NODE_ENV') === 'development', // Only synchronize in dev
+        migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
+        migrationsRun: configService.get('NODE_ENV') === 'production', // Auto-run migrations in prod
+        ssl: configService.get<string>('DATABASE_URL')?.includes('neon.tech')
+          ? { rejectUnauthorized: false }
+          : false,
         extra: {
           max: 10,
         },

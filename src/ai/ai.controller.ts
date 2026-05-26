@@ -20,9 +20,9 @@ export class AiController {
     if (!body.imageBase64) {
       throw new HttpException('Image is required', HttpStatus.BAD_REQUEST);
     }
-    
+
     // Clean up base 64 prefix if present
-    const base64 = body.imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    const base64 = body.imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
     return this.aiService.suggestCaption(base64);
   }
