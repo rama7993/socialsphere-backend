@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AppDataSource } from './data-source';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { AppController } from './app.controller';
-import { Comment } from './comments/entities/comment.entity';
 import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
 import { AppService } from './app.service';
@@ -30,23 +30,14 @@ import { AiModule } from './ai/ai.module';
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
-        autoLoadEntities: true,
-        synchronize: configService.get('NODE_ENV') === 'development', // Only synchronize in dev
-        migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
-        migrationsRun: configService.get('NODE_ENV') === 'production', // Auto-run migrations in prod
-        ssl: configService.get<string>('DATABASE_URL')?.includes('neon.tech')
-          ? { rejectUnauthorized: false }
-          : false,
-        extra: {
-          max: 10,
-        },
-      }),
-      inject: [ConfigService],
+    TypeOrmModule.forRoot({
+      ...AppDataSource.options,
+      autoLoadEntities: true,
+      synchronize: (process.env.NODE_ENV || 'development').trim() === 'development',
+      migrationsRun: (process.env.NODE_ENV || 'development').trim() === 'production',
+      extra: {
+        max: 10,
+      },
     }),
     AuthModule,
     UsersModule,
